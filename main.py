@@ -15,6 +15,7 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 base_url = config["API"]["base_url"]
 
+
 # Check if the provided index is a valid number
 def sane_index(index):
     """
@@ -28,6 +29,7 @@ def sane_index(index):
     """
     return str(index).isdigit()
 
+
 # Check if the provided path is a valid file path and exists
 def sane_path(path):
     """
@@ -40,6 +42,7 @@ def sane_path(path):
         FileNotFoundError: If the file path does not exist.
     """
     Path(path).resolve(strict=True)
+
 
 # Fetches and decodes the body of a log entry by its index
 def get_log_body(log_index, debug=False):
@@ -63,6 +66,7 @@ def get_log_body(log_index, debug=False):
     body = json.loads(base64.b64decode(body))
     return body
 
+
 # Fetches a full log entry by its index
 def get_log_entry(log_index, debug=False):
     """
@@ -80,6 +84,7 @@ def get_log_entry(log_index, debug=False):
     data = requests.get(api).json()
     log = next(iter(data.values()))
     return log
+
 
 # Fetches the verification proof (inclusion proof) for a log entry
 def get_verification_proof(log_index, debug=False):
@@ -100,6 +105,7 @@ def get_verification_proof(log_index, debug=False):
     proof = log["verification"]["inclusionProof"]
     proof["leafHash"] = leaf_hash
     return proof
+
 
 # Verifies the inclusion of an artifact in the transparency log
 def inclusion(log_index, artifact_filepath, debug=False):
@@ -122,6 +128,7 @@ def inclusion(log_index, artifact_filepath, debug=False):
         proof["rootHash"],
     )
 
+
 # Fetches the latest checkpoint from the Rekor log server
 def get_latest_checkpoint(debug=False):
     """
@@ -130,6 +137,7 @@ def get_latest_checkpoint(debug=False):
     api = f"{base_url}/log"
     checkpoint = requests.get(api).json()
     return checkpoint
+
 
 # Verifies the consistency of a checkpoint with the latest checkpoint from the log
 def consistency(prev_checkpoint, debug=False):
@@ -154,6 +162,7 @@ def consistency(prev_checkpoint, debug=False):
         rootHash,
     )
 
+
 # Entry point for the command-line interface
 def main():
     debug = False
@@ -163,16 +172,25 @@ def main():
         "-d", "--debug", help="Debug mode", required=False, action="store_true"
     )
     parser.add_argument(
-        "-c", "--checkpoint", help="Obtain latest checkpoint", required=False, action="store_true"
+        "-c",
+        "--checkpoint",
+        help="Obtain latest checkpoint",
+        required=False,
+        action="store_true",
     )
     parser.add_argument(
-        "--inclusion", help="Verify inclusion of an entry in the Rekor Transparency Log using log index", required=False, type=int
+        "--inclusion",
+        help="Verify inclusion of an entry in the Rekor Transparency Log using log index",
+        required=False,
+        type=int,
     )
     parser.add_argument(
         "--artifact", help="Artifact filepath for verifying signature", required=False
     )
     parser.add_argument(
-        "--consistency", help="Verify consistency of a given checkpoint with the latest checkpoint.", action="store_true"
+        "--consistency",
+        help="Verify consistency of a given checkpoint with the latest checkpoint.",
+        action="store_true",
     )
     parser.add_argument(
         "--tree-id", help="Tree ID for consistency proof", required=False
@@ -199,7 +217,9 @@ def main():
 
     if args.consistency:
         if not args.tree_id or not args.tree_size or not args.root_hash:
-            print("Please specify tree id, tree size, and root hash for prev checkpoint")
+            print(
+                "Please specify tree id, tree size, and root hash for prev checkpoint"
+            )
             return
 
         prev_checkpoint = {
