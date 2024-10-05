@@ -12,11 +12,29 @@ from pathlib import Path
 
 # Check if the provided index is a valid number
 def sane_index(index):
+    """
+    Check if the provided log index is a valid number.
+
+    Args:
+        index (str or int): The log index to validate.
+
+    Returns:
+        bool: True if the index is a valid number, False otherwise.
+    """
     return str(index).isdigit()  # Returns True if the index is a digit (a valid number)
 
 
 # Check if the provided path is a valid file path and exists
 def sane_path(path):
+    """
+    Validate that the provided file path exists.
+
+    Args:
+        path (str): The file path to validate.
+
+    Raises:
+        FileNotFoundError: If the file path does not exist.
+    """
     Path(path).resolve(
         strict=True
     )  # Resolves the path and checks if it exists (raises an error if not)
@@ -25,6 +43,19 @@ def sane_path(path):
 
 # Fetches and decodes the body of a log entry by its index
 def get_log_body(log_index, debug=False):
+    """
+    Fetch and decode the body of a Rekor log entry by its index.
+
+    Args:
+        log_index (int): The log index to fetch.
+        debug (bool, optional): Flag to enable debug output. Defaults to False.
+
+    Returns:
+        dict: The decoded body of the log entry.
+
+    Raises:
+        AssertionError: If the log index is not a valid number.
+    """
     assert sane_index(
         log_index
     ), "The value is Not a Number (NaN)."  # Validate that the log index is a number
@@ -39,6 +70,19 @@ def get_log_body(log_index, debug=False):
 
 # Fetches a full log entry by its index
 def get_log_entry(log_index, debug=False):
+    """
+    Fetch a full Rekor log entry by its index.
+
+    Args:
+        log_index (int): The log index to fetch.
+        debug (bool, optional): Flag to enable debug output. Defaults to False.
+
+    Returns:
+        dict: The full log entry as returned by the Rekor server.
+
+    Raises:
+        AssertionError: If the log index is not a valid number.
+    """
     assert sane_index(
         log_index
     ), "The value is Not a Number (NaN)."  # Validate log index
@@ -50,6 +94,19 @@ def get_log_entry(log_index, debug=False):
 
 # Fetches the verification proof (inclusion proof) for a log entry
 def get_verification_proof(log_index, debug=False):
+    """
+    Fetch the verification proof (inclusion proof) for a given log entry.
+
+    Args:
+        log_index (int): The log index to fetch proof for.
+        debug (bool, optional): Flag to enable debug output. Defaults to False.
+
+    Returns:
+        dict: The inclusion proof containing the leaf hash and other proof data.
+
+    Raises:
+        AssertionError: If the log index is not a valid number.
+    """
     assert sane_index(
         log_index
     ), "The value is Not a Number (NaN)."  # Validate log index
@@ -63,6 +120,18 @@ def get_verification_proof(log_index, debug=False):
 
 # Verifies the inclusion of an artifact in the transparency log
 def inclusion(log_index, artifact_filepath, debug=False):
+    """
+    Verify the inclusion of an artifact in the transparency log by its log index.
+
+    Args:
+        log_index (int): The log index of the entry.
+        artifact_filepath (str): Path to the artifact file for signature verification.
+        debug (bool, optional): Flag to enable debug output. Defaults to False.
+
+    Raises:
+        FileNotFoundError: If the artifact file does not exist.
+        AssertionError: If the log index is not a valid number.
+    """
     sane_path(artifact_filepath)  # Ensure that the artifact file exists
     log = get_log_body(log_index)  # Fetch the log body
     signature = base64.b64decode(
@@ -89,6 +158,15 @@ def inclusion(log_index, artifact_filepath, debug=False):
 
 # Fetches the latest checkpoint from the Rekor log server
 def get_latest_checkpoint(debug=False):
+    """
+    Fetch the latest checkpoint from the Rekor log server.
+
+    Args:
+        debug (bool, optional): Flag to enable debug output. Defaults to False.
+
+    Returns:
+        dict: The latest checkpoint from the log server.
+    """
     api = "https://rekor.sigstore.dev/api/v1/log"  # API to fetch the latest checkpoint
     checkpoint = requests.get(api).json()  # Make API call to fetch checkpoint
     return checkpoint
@@ -96,6 +174,16 @@ def get_latest_checkpoint(debug=False):
 
 # Verifies the consistency of a checkpoint with the latest checkpoint from the log
 def consistency(prev_checkpoint, debug=False):
+    """
+    Verify the consistency between a previous checkpoint and the latest one using Merkle proof.
+
+    Args:
+        prev_checkpoint (dict): The previous checkpoint data including treeID, treeSize, and rootHash.
+        debug (bool, optional): Flag to enable debug output. Defaults to False.
+
+    Raises:
+        AssertionError: If the previous checkpoint is empty.
+    """
     assert (
         prev_checkpoint != {}
     ), "Previous checkpoint empty"  # Ensure the previous checkpoint is not empty
