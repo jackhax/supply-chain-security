@@ -189,7 +189,6 @@ def consistency(prev_checkpoint, debug=False):
     ), "Previous checkpoint empty"  # Ensure the previous checkpoint is not empty
     checkpoint = get_latest_checkpoint()  # Fetch the latest checkpoint
 
-    treeID = checkpoint["treeID"]
     rootHash = checkpoint["rootHash"]
     treeSize = checkpoint["treeSize"]
     # Fetch the proof of consistency between the previous checkpoint and the current one
