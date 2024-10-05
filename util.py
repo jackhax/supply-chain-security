@@ -52,7 +52,7 @@ def verify_artifact_signature(signature, public_key, artifact_filename):
     try:
         public_key.verify(signature, data, ec.ECDSA(hashes.SHA256()))
         print("Signature is valid")
-    except InvalidSignature as e:
+    except InvalidSignature:
         print("Signature is invalid")
         exit()
     except Exception as e:

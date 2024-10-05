@@ -23,9 +23,9 @@ class Hasher:
         h.update(leaf)
         return h.digest()
 
-    def hash_children(self, l, r):
+    def hash_children(self, left, right):
         h = self.new()
-        b = bytes([RFC6962_NODE_HASH_PREFIX]) + l + r
+        b = bytes([RFC6962_NODE_HASH_PREFIX]) + left + right
         h.update(b)
         return h.digest()
 
@@ -87,7 +87,7 @@ def verify_consistency(hasher, size1, size2, proof, root1, root2):
     try:
         verify_match(hash2, root2)
         print("Consistency verification successful")
-    except Exception as e:
+    except Exception:
         print("Consistency verification failed")
         exit()
 

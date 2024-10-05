@@ -6,7 +6,9 @@ from merkle_proof import (
     verify_inclusion,
     compute_leaf_hash,
 )
-import json, base64, requests
+import json
+import base64
+import requests
 from pathlib import Path
 import configparser  # For reading the config file
 
