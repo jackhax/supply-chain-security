@@ -8,7 +8,12 @@ from merkle_proof import (
 )
 import json, base64, requests
 from pathlib import Path
+import configparser  # For reading the config file
 
+# Initialize the global base_url from config
+config = configparser.ConfigParser()
+config.read("config.ini")
+base_url = config["API"]["base_url"]
 
 # Check if the provided index is a valid number
 def sane_index(index):
@@ -21,8 +26,7 @@ def sane_index(index):
     Returns:
         bool: True if the index is a valid number, False otherwise.
     """
-    return str(index).isdigit()  # Returns True if the index is a digit (a valid number)
-
+    return str(index).isdigit()
 
 # Check if the provided path is a valid file path and exists
 def sane_path(path):
@@ -35,11 +39,7 @@ def sane_path(path):
     Raises:
         FileNotFoundError: If the file path does not exist.
     """
-    Path(path).resolve(
-        strict=True
-    )  # Resolves the path and checks if it exists (raises an error if not)
-    # This can be extended to restrict paths to a specific base directory for better security (LFI prevention).
-
+    Path(path).resolve(strict=True)
 
 # Fetches and decodes the body of a log entry by its index
 def get_log_body(log_index, debug=False):
@@ -56,17 +56,12 @@ def get_log_body(log_index, debug=False):
     Raises:
         AssertionError: If the log index is not a valid number.
     """
-    assert sane_index(
-        log_index
-    ), "The value is Not a Number (NaN)."  # Validate that the log index is a number
-    api = f"https://rekor.sigstore.dev/api/v1/log/entries?logIndex={log_index}"
-    data = requests.get(api).json()  # Make an API call to fetch log data
-    body = next(iter(data.values()))[
-        "body"
-    ]  # Extract the 'body' field from the log entry
-    body = json.loads(base64.b64decode(body))  # Decode the body from base64
+    assert sane_index(log_index), "The value is Not a Number (NaN)."
+    api = f"{base_url}/log/entries?logIndex={log_index}"
+    data = requests.get(api).json()
+    body = next(iter(data.values()))["body"]
+    body = json.loads(base64.b64decode(body))
     return body
-
 
 # Fetches a full log entry by its index
 def get_log_entry(log_index, debug=False):
@@ -79,18 +74,12 @@ def get_log_entry(log_index, debug=False):
 
     Returns:
         dict: The full log entry as returned by the Rekor server.
-
-    Raises:
-        AssertionError: If the log index is not a valid number.
     """
-    assert sane_index(
-        log_index
-    ), "The value is Not a Number (NaN)."  # Validate log index
-    api = f"https://rekor.sigstore.dev/api/v1/log/entries?logIndex={log_index}"
-    data = requests.get(api).json()  # Fetch log entry from the API
-    log = next(iter(data.values()))  # Get the first log entry
+    assert sane_index(log_index), "The value is Not a Number (NaN)."
+    api = f"{base_url}/log/entries?logIndex={log_index}"
+    data = requests.get(api).json()
+    log = next(iter(data.values()))
     return log
-
 
 # Fetches the verification proof (inclusion proof) for a log entry
 def get_verification_proof(log_index, debug=False):
@@ -103,49 +92,27 @@ def get_verification_proof(log_index, debug=False):
 
     Returns:
         dict: The inclusion proof containing the leaf hash and other proof data.
-
-    Raises:
-        AssertionError: If the log index is not a valid number.
     """
-    assert sane_index(
-        log_index
-    ), "The value is Not a Number (NaN)."  # Validate log index
-    log = get_log_entry(log_index)  # Fetch the log entry
+    assert sane_index(log_index), "The value is Not a Number (NaN)."
+    log = get_log_entry(log_index)
     body = log["body"]
-    leaf_hash = compute_leaf_hash(body)  # Compute the leaf hash for the log entry
-    proof = log["verification"]["inclusionProof"]  # Extract the inclusion proof
-    proof["leafHash"] = leaf_hash  # Add the computed leaf hash to the proof
+    leaf_hash = compute_leaf_hash(body)
+    proof = log["verification"]["inclusionProof"]
+    proof["leafHash"] = leaf_hash
     return proof
-
 
 # Verifies the inclusion of an artifact in the transparency log
 def inclusion(log_index, artifact_filepath, debug=False):
     """
     Verify the inclusion of an artifact in the transparency log by its log index.
-
-    Args:
-        log_index (int): The log index of the entry.
-        artifact_filepath (str): Path to the artifact file for signature verification.
-        debug (bool, optional): Flag to enable debug output. Defaults to False.
-
-    Raises:
-        FileNotFoundError: If the artifact file does not exist.
-        AssertionError: If the log index is not a valid number.
     """
-    sane_path(artifact_filepath)  # Ensure that the artifact file exists
-    log = get_log_body(log_index)  # Fetch the log body
-    signature = base64.b64decode(
-        log["spec"]["signature"]["content"]
-    )  # Decode the signature from base64
-    cert = base64.b64decode(
-        log["spec"]["signature"]["publicKey"]["content"]
-    )  # Decode the public key
-    public_key = extract_public_key(cert)  # Extract the public key from the certificate
-    verify_artifact_signature(
-        signature, public_key, artifact_filepath
-    )  # Verify the artifact signature
-    proof = get_verification_proof(log_index)  # Get the inclusion proof
-    # Verify that the log entry is included in the transparency log
+    sane_path(artifact_filepath)
+    log = get_log_body(log_index)
+    signature = base64.b64decode(log["spec"]["signature"]["content"])
+    cert = base64.b64decode(log["spec"]["signature"]["publicKey"]["content"])
+    public_key = extract_public_key(cert)
+    verify_artifact_signature(signature, public_key, artifact_filepath)
+    proof = get_verification_proof(log_index)
     verify_inclusion(
         DefaultHasher,
         proof["logIndex"],
@@ -155,48 +122,29 @@ def inclusion(log_index, artifact_filepath, debug=False):
         proof["rootHash"],
     )
 
-
 # Fetches the latest checkpoint from the Rekor log server
 def get_latest_checkpoint(debug=False):
     """
     Fetch the latest checkpoint from the Rekor log server.
-
-    Args:
-        debug (bool, optional): Flag to enable debug output. Defaults to False.
-
-    Returns:
-        dict: The latest checkpoint from the log server.
     """
-    api = "https://rekor.sigstore.dev/api/v1/log"  # API to fetch the latest checkpoint
-    checkpoint = requests.get(api).json()  # Make API call to fetch checkpoint
+    api = f"{base_url}/log"
+    checkpoint = requests.get(api).json()
     return checkpoint
-
 
 # Verifies the consistency of a checkpoint with the latest checkpoint from the log
 def consistency(prev_checkpoint, debug=False):
     """
     Verify the consistency between a previous checkpoint and the latest one using Merkle proof.
-
-    Args:
-        prev_checkpoint (dict): The previous checkpoint data including treeID, treeSize, and rootHash.
-        debug (bool, optional): Flag to enable debug output. Defaults to False.
-
-    Raises:
-        AssertionError: If the previous checkpoint is empty.
     """
-    assert (
-        prev_checkpoint != {}
-    ), "Previous checkpoint empty"  # Ensure the previous checkpoint is not empty
-    checkpoint = get_latest_checkpoint()  # Fetch the latest checkpoint
+    assert prev_checkpoint != {}, "Previous checkpoint empty"
+    checkpoint = get_latest_checkpoint()
 
     rootHash = checkpoint["rootHash"]
     treeSize = checkpoint["treeSize"]
-    # Fetch the proof of consistency between the previous checkpoint and the current one
     proof = requests.get(
-        f'https://rekor.sigstore.dev/api/v1/log/proof?firstSize={prev_checkpoint["treeSize"]}&lastSize={treeSize}'
+        f'{base_url}/log/proof?firstSize={prev_checkpoint["treeSize"]}&lastSize={treeSize}'
     ).json()["hashes"]
 
-    # Verify the consistency between the previous and the latest checkpoint using the Merkle proof
     verify_consistency(
         DefaultHasher,
         prev_checkpoint["treeSize"],
@@ -206,56 +154,26 @@ def consistency(prev_checkpoint, debug=False):
         rootHash,
     )
 
-
 # Entry point for the command-line interface
 def main():
     debug = False
-    # Initialize argument parser for handling command-line arguments
     parser = argparse.ArgumentParser(description="Rekor Verifier")
 
-    # Argument for enabling debug mode
     parser.add_argument(
         "-d", "--debug", help="Debug mode", required=False, action="store_true"
-    )  # Default false
-
-    # Argument for fetching the latest checkpoint
-    parser.add_argument(
-        "-c",
-        "--checkpoint",
-        help="Obtain latest checkpoint\
-                        from Rekor Server public instance",
-        required=False,
-        action="store_true",
     )
-
-    # Argument for verifying inclusion of an entry in the Rekor log
     parser.add_argument(
-        "--inclusion",
-        help="Verify inclusion of an\
-                        entry in the Rekor Transparency Log using log index\
-                        and artifact filename.\
-                        Usage: --inclusion 126574567",
-        required=False,
-        type=int,
+        "-c", "--checkpoint", help="Obtain latest checkpoint", required=False, action="store_true"
     )
-
-    # Argument for specifying artifact file path
     parser.add_argument(
-        "--artifact",
-        help="Artifact filepath for verifying\
-                        signature",
-        required=False,
+        "--inclusion", help="Verify inclusion of an entry in the Rekor Transparency Log using log index", required=False, type=int
     )
-
-    # Argument for verifying consistency between checkpoints
     parser.add_argument(
-        "--consistency",
-        help="Verify consistency of a given\
-                        checkpoint with the latest checkpoint.",
-        action="store_true",
+        "--artifact", help="Artifact filepath for verifying signature", required=False
     )
-
-    # Arguments for checkpoint consistency verification
+    parser.add_argument(
+        "--consistency", help="Verify consistency of a given checkpoint with the latest checkpoint.", action="store_true"
+    )
     parser.add_argument(
         "--tree-id", help="Tree ID for consistency proof", required=False
     )
@@ -266,42 +184,30 @@ def main():
         "--root-hash", help="Root hash for consistency proof", required=False
     )
 
-    # Parse arguments
     args = parser.parse_args()
 
     if args.debug:
-        debug = True  # Enable debug mode
+        debug = True
         print("enabled debug mode")
 
-    # Fetch and print the latest checkpoint if requested
     if args.checkpoint:
         checkpoint = get_latest_checkpoint(debug)
         print(json.dumps(checkpoint, indent=4))
 
-    # Verify inclusion in the Rekor log if requested
     if args.inclusion:
         inclusion(args.inclusion, args.artifact, debug)
 
-    # Verify consistency of the previous checkpoint with the latest one
     if args.consistency:
-        # Ensure necessary parameters for the previous checkpoint are provided
-        if not args.tree_id:
-            print("please specify tree id for prev checkpoint")
-            return
-        if not args.tree_size:
-            print("please specify tree size for prev checkpoint")
-            return
-        if not args.root_hash:
-            print("please specify root hash for prev checkpoint")
+        if not args.tree_id or not args.tree_size or not args.root_hash:
+            print("Please specify tree id, tree size, and root hash for prev checkpoint")
             return
 
-        # Construct the previous checkpoint object
-        prev_checkpoint = {}
-        prev_checkpoint["treeID"] = args.tree_id
-        prev_checkpoint["treeSize"] = args.tree_size
-        prev_checkpoint["rootHash"] = args.root_hash
+        prev_checkpoint = {
+            "treeID": args.tree_id,
+            "treeSize": args.tree_size,
+            "rootHash": args.root_hash,
+        }
 
-        # Perform the consistency check
         consistency(prev_checkpoint, debug)
 
 
