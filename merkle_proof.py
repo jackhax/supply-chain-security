@@ -156,6 +156,8 @@ def verify_inclusion(hasher, index, size, leaf_hash, proof, root, debug=False):
         verify_match(calc_root, bytearray_root)
         print('Offline root hash calculation for inclusion verified')
     except Exception as e:
+        if debug:
+            print('Exception:',e)
         print('Offline root hash calculation for inclusion could not be verified')
         exit()
 
