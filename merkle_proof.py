@@ -1,3 +1,10 @@
+"""
+This module provides functionality for Merkle tree hash calculations 
+according to RFC 6962. It includes classes and functions for hashing 
+leaves, nodes, verifying consistency and inclusion proofs, and 
+computing leaf hashes.
+"""
+
 import hashlib
 import binascii
 import base64
@@ -8,28 +15,35 @@ RFC6962_NODE_HASH_PREFIX = 1
 
 
 class Hasher:
+    """Hasher class to create and manage hash operations."""
+
     def __init__(self, hash_func=hashlib.sha256):
         self.hash_func = hash_func
 
     def new(self):
+        """Creates a new hash object."""
         return self.hash_func()
 
     def empty_root(self):
+        """Returns the hash of an empty root."""
         return self.new().digest()
 
     def hash_leaf(self, leaf):
+        """Hashes a leaf using the RFC 6962 specification."""
         h = self.new()
         h.update(bytes([RFC6962_LEAF_HASH_PREFIX]))
         h.update(leaf)
         return h.digest()
 
     def hash_children(self, left, right):
+        """Hashes two child nodes."""
         h = self.new()
         b = bytes([RFC6962_NODE_HASH_PREFIX]) + left + right
         h.update(b)
         return h.digest()
 
     def size(self):
+        """Returns the size of the hash output."""
         return self.new().digest_size
 
 
@@ -38,12 +52,10 @@ DefaultHasher = Hasher(hashlib.sha256)
 
 
 def verify_consistency(hasher, size1, size2, proof, root1, root2):
-    # change format of args to be bytearray instead of hex strings
+    """Verifies the consistency between two root hashes."""
     root1 = bytes.fromhex(root1)
     root2 = bytes.fromhex(root2)
-    bytearray_proof = []
-    for elem in proof:
-        bytearray_proof.append(bytes.fromhex(elem))
+    bytearray_proof = [bytes.fromhex(elem) for elem in proof]
 
     if size2 < size1:
         raise ValueError(f"size2 ({size2}) < size1 ({size1})")
@@ -65,10 +77,7 @@ def verify_consistency(hasher, size1, size2, proof, root1, root2):
     shift = (size1 & -size1).bit_length() - 1
     inner -= shift
 
-    if size1 == 1 << shift:
-        seed, start = root1, 0
-    else:
-        seed, start = bytearray_proof[0], 1
+    seed, start = (root1, 0) if size1 == 1 << shift else (bytearray_proof[0], 1)
 
     if len(bytearray_proof) != start + inner + border:
         raise ValueError(
@@ -93,21 +102,25 @@ def verify_consistency(hasher, size1, size2, proof, root1, root2):
 
 
 def verify_match(calculated, expected):
+    """Verifies that the calculated hash matches the expected hash."""
     if calculated != expected:
         raise RootMismatchError(expected, calculated)
 
 
 def decomp_incl_proof(index, size):
+    """Decomposes the inclusion proof to get inner and border sizes."""
     inner = inner_proof_size(index, size)
     border = bin(index >> inner).count("1")
     return inner, border
 
 
 def inner_proof_size(index, size):
+    """Calculates the inner proof size based on index and size."""
     return (index ^ (size - 1)).bit_length()
 
 
 def chain_inner(hasher, seed, proof, index):
+    """Chains hashes for inner nodes based on the proof and index."""
     for i, h in enumerate(proof):
         if (index >> i) & 1 == 0:
             seed = hasher.hash_children(seed, h)
@@ -117,6 +130,7 @@ def chain_inner(hasher, seed, proof, index):
 
 
 def chain_inner_right(hasher, seed, proof, index):
+    """Chains hashes from the right for inner nodes based on proof and index."""
     for i, h in enumerate(proof):
         if (index >> i) & 1 == 1:
             seed = hasher.hash_children(h, seed)
@@ -124,12 +138,15 @@ def chain_inner_right(hasher, seed, proof, index):
 
 
 def chain_border_right(hasher, seed, proof):
+    """Chains hashes for border nodes based on the proof."""
     for h in proof:
         seed = hasher.hash_children(h, seed)
     return seed
 
 
 class RootMismatchError(Exception):
+    """Custom exception raised when root hashes do not match."""
+
     def __init__(self, expected_root, calculated_root):
         self.expected_root = binascii.hexlify(bytearray(expected_root))
         self.calculated_root = binascii.hexlify(bytearray(calculated_root))
@@ -139,6 +156,7 @@ class RootMismatchError(Exception):
 
 
 def root_from_inclusion_proof(hasher, index, size, leaf_hash, proof):
+    """Calculates the root from an inclusion proof."""
     if index >= size:
         raise ValueError(f"index is beyond size: {index} >= {size}")
 
@@ -157,10 +175,8 @@ def root_from_inclusion_proof(hasher, index, size, leaf_hash, proof):
 
 
 def verify_inclusion(hasher, index, size, leaf_hash, proof, root, debug=False):
-    bytearray_proof = []
-    for elem in proof:
-        bytearray_proof.append(bytes.fromhex(elem))
-
+    """Verifies the inclusion of a leaf hash in a Merkle tree."""
+    bytearray_proof = [bytes.fromhex(elem) for elem in proof]
     bytearray_root = bytes.fromhex(root)
     bytearray_leaf = bytes.fromhex(leaf_hash)
     calc_root = root_from_inclusion_proof(
@@ -180,18 +196,12 @@ def verify_inclusion(hasher, index, size, leaf_hash, proof, root, debug=False):
         exit()
 
 
-# requires entry["body"] output for a log entry
-# returns the leaf hash according to the rfc 6962 spec
+# Requires entry["body"] output for a log entry
+# Returns the leaf hash according to the RFC 6962 spec
 def compute_leaf_hash(body):
+    """Computes the leaf hash from the entry body."""
     entry_bytes = base64.b64decode(body)
-
-    # create a new sha256 hash object
     h = hashlib.sha256()
-    # write the leaf hash prefix
     h.update(bytes([RFC6962_LEAF_HASH_PREFIX]))
-
-    # write the actual leaf data
     h.update(entry_bytes)
-
-    # return the computed hash
     return h.hexdigest()
