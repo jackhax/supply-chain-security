@@ -28,6 +28,7 @@ The project will be divided into the following assignments:
    - Black for formatting
    - Flake8, ruff and pylint for linting
    - mypy for Type checking
+   - Bandit for SAST
 
 #### More assignments to come
 
