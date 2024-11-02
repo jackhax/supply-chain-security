@@ -1,7 +1,7 @@
-# Software Supply Chain Security Project
+# Software Supply Chain Security
 
 ## Project Overview
-This project is an implementation of a software supply chain security tools and technologies.
+This project is an implementation of software supply chain security tools and technologies.
 
 ## Assignments Overview
 The project will be divided into the following assignments:
