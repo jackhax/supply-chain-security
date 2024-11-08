@@ -1,0 +1,4 @@
+requests
+cryptography
+trufflehog
+pre-commit
