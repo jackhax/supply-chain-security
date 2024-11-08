@@ -1,7 +1,9 @@
 repos:
-  - repo: https://github.com/trufflesecurity/trufflehog
-    rev: v3.83.5 # Use the latest stable version at the time
-    hooks:
-      - id: trufflehog
-        # args: ["--no-verification"]
-
+- repo: local
+  hooks:
+    - id: trufflehog
+      name: TruffleHog
+      description: Detect secrets in your data.
+      entry: bash -c 'trufflehog . --max_depth 1 '
+      language: system
+      stages: ["pre-commit", "pre-push"]
