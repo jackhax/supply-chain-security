@@ -3,5 +3,5 @@ repos:
     rev: v3.83.5 # Use the latest stable version at the time
     hooks:
       - id: trufflehog
-        args: ["--no-verification"]
+        # args: ["--no-verification"]
 
