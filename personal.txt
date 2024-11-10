@@ -1,0 +1,4 @@
+Name: Adnan Jakati
+Email: test@nyu.edu
+phone: 6466466467
+address: 370 Jay St
