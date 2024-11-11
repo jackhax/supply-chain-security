@@ -36,6 +36,7 @@ from util import (
 )  # Utility functions for signature handling
 from merkle_proof import (  # Importing Merkle proof-related functions for verifying proofs
     DefaultHasher,
+    RootMismatchError,
     verify_consistency,
     verify_inclusion,
     compute_leaf_hash,
@@ -142,9 +143,14 @@ def inclusion(log_index, artifact_filepath, debug=False):
     """
     sane_path(artifact_filepath)  # Validate the file path
     log = get_log_body(log_index)  # Fetch the log body
-    signature = base64.b64decode(
-        log["spec"]["signature"]["content"]
-    )  # Decode the signature
+    try:
+        signature = base64.b64decode(
+            log["spec"]["signature"]["content"]
+        )  # Decode the signature
+    except KeyError:
+        print('Invalid log index')
+        return
+
     cert = base64.b64decode(
         log["spec"]["signature"]["publicKey"]["content"]
     )  # Decode the public key
@@ -210,6 +216,7 @@ def consistency(prev_checkpoint, debug=False):
         ).json()[
             "hashes"
         ]  # Extract the list of hashes from the response
+        print(proof)
     except requests.exceptions.Timeout:  # Handle timeout error
         print("Timed out")
         return None
@@ -303,7 +310,10 @@ def main():
             "rootHash": args.root_hash,
         }
 
-        consistency(prev_checkpoint, debug)  # Perform consistency verification
+        try:
+            consistency(prev_checkpoint, debug)  # Perform consistency verification
+        except RootMismatchError:
+            print('Consistency cannot be verified')
 
 
 if __name__ == "__main__":

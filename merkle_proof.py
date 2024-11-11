@@ -53,8 +53,12 @@ DefaultHasher = Hasher(hashlib.sha256)
 
 def verify_consistency(hasher, size1, size2, proof, root1, root2):
     """Verifies the consistency between two root hashes."""
-    root1 = bytes.fromhex(root1)
-    root2 = bytes.fromhex(root2)
+    try:
+        root1 = bytes.fromhex(root1)
+        root2 = bytes.fromhex(root2)
+    except ValueError:
+        print('Invalid root(s)')
+        return
     bytearray_proof = [bytes.fromhex(elem) for elem in proof]
 
     if size2 < size1:
