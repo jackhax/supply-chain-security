@@ -2,6 +2,8 @@ venv/
 temp.txt
 personal.txt
 artifact_invalid.md
+secret.txt
+
 .DS_Store
 # Byte-compiled / optimized / DLL files
 *__pycache__/
