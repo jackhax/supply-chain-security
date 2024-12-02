@@ -19,7 +19,7 @@ def test_consistency():
     # Run the main.py script with the updated valid values for the --consistency flag
     result = subprocess.run(
         [
-            'python', 'main.py', '--consistency',
+            'python', '-m', 'rektor.main', '--consistency',
             '--tree-id', '11930509599166506',
             '--tree-size', '11137518',
             '--root-hash', '83edbcbc1ab683a272b48016ae81ba7903f69af7f99e9805eb52804191ed03fc10'

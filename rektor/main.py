@@ -28,13 +28,12 @@ import argparse
 import json
 import base64
 from pathlib import Path
-import configparser  # For reading the config file
 import requests
-from util import (
+from .util import (
     extract_public_key,
     verify_artifact_signature,
 )  # Utility functions for signature handling
-from merkle_proof import (  # Importing Merkle proof-related functions for verifying proofs
+from .merkle_proof import (  # Importing Merkle proof-related functions for verifying proofs
     DefaultHasher,
     RootMismatchError,
     verify_consistency,
@@ -42,10 +41,8 @@ from merkle_proof import (  # Importing Merkle proof-related functions for verif
     compute_leaf_hash,
 )
 
-# Initialize the global base_url from config
-config = configparser.ConfigParser()  # Create a config parser instance
-config.read("config.ini")  # Read the config file
-base_url = config["API"]["base_url"]  # Extract the base_url from the config
+# Initialize the global base_url 
+base_url = 'https://rekor.sigstore.dev/api/v1'
 
 
 # Check if the provided index is a valid number

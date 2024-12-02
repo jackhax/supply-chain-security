@@ -17,7 +17,7 @@ def test_consistency():
     # Run the main.py script with the updated valid values for the --consistency flag
     result = subprocess.run(
         [
-            'python', 'main.py',
+            'python', '-m', 'rektor.main', '--consistency',
             '--inclusion', '133040969',
             '--artifact', 'artifact_invalid.md'
         ],

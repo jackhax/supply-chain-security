@@ -1,5 +1,5 @@
 import pytest
-from main import sane_path
+from rektor.main import sane_path
 from pathlib import Path
 
 def test_sane_path_valid(tmp_path):
