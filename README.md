@@ -1,73 +1,120 @@
-# Software Supply Chain Security
 
-## Project Overview
-This project is an implementation of software supply chain security tools and technologies.
+# **Software Supply Chain Security**
 
-## Assignments Overview
-The project is divided into the following assignments:
+## **Project Overview**
+This project demonstrates the implementation of tools and techniques to enhance software supply chain security. It includes signing, verification, dependency management, code quality improvement, and SBOM generation, aligned with best practices in software development and security.
 
-### Assignment 1: Artifact Signing and Verification
-#### Tasks
-1. Create a text file artifact (`artifact.md`) containing your NYU Net ID.
-2. Install Sigstore’s cosign tool and sign the artifact, uploading its signature to the Rekor transparency log.
-3. Write Python code to:
+---
+
+## **Assignments Overview**
+
+### **Assignment 1: Artifact Signing and Verification**
+#### Tasks:
+1. Created a text file artifact (`artifact.md`) containing the NYU Net ID.
+2. Installed Sigstore’s `cosign` tool and signed the artifact, uploading its signature to the Rekor transparency log.
+3. Developed Python code to:
    - Fetch entry details from the Rekor log.
-   - Extract signature and certificate.
+   - Extract the signature and certificate.
    - Verify the signature using the public key from the certificate.
    - Verify the inclusion proof of the artifact.
-4. Implement code to check the consistency between older and latest checkpoints in the transparency log.
+4. Implemented code to check consistency between older and latest checkpoints in the transparency log.
 
-### Assignment 2: Code Quality Improvement
-#### Tasks
+---
+
+### **Assignment 2: Code Quality Improvement**
+#### Tasks:
 1. **Code Review**:
-   - Collaborate with teammates to conduct a code review on their GitHub repositories.
-   - Create issues linked to specific lines of code for feedback and discussion.
-   - Resolve all raised issues in the following week.
-   
-2. **Static Analysis Tools**:
-   - Black for formatting
-   - Flake8, ruff, and pylint for linting
-   - mypy for type checking
-   - Bandit for SAST (Static Application Security Testing)
+   - Conducted peer code reviews on GitHub repositories.
+   - Created issues linked to specific lines of code for feedback and discussion.
+   - Resolved all raised issues in the following week.
 
-### Assignment 3: Git Best Practices and Dependency Management
-#### Tasks
+2. **Static Analysis Tools**:
+   - Used tools to enforce code quality:
+     - **Formatting**: Black and Ruff.
+     - **Linting**: Flake8, Ruff, and Pylint.
+     - **Type Checking**: mypy.
+     - **Static Application Security Testing (SAST)**: Bandit.
+
+---
+
+### **Assignment 3: Git Best Practices and Dependency Management**
+#### Tasks:
 1. **Git Best Practices**:
-   - Add the following files to the repository:
+   - Added the following files to the repository:
      - `README.md` for project documentation.
      - `SECURITY.md` to outline security policies.
-     - `CONTRIBUTING.md` to guide contributions.
+     - `CONTRIBUTING.md` for contribution guidelines.
      - `LICENSE` for legal permissions.
      - `CODEOWNERS` to define code ownership.
      - `.gitignore` to exclude unnecessary files.
-   - Configure branch protection rules to prevent direct commits to `main` without a pull request.
+   - Configured branch protection rules to enforce pull requests for changes to `main`.
 
 2. **Prevent Secrets Leakage**:
-   - Set up `trufflehog` and `pre-commit` hooks to prevent committing secrets.
-   - Configure `pre-commit` to scan only the latest commit for secrets.
+   - Configured `trufflehog` and `pre-commit` hooks to scan for secrets in the latest commit.
+   - Implemented `pre-commit` hooks for secret detection.
 
 3. **Scrub Old Secrets**:
-   - Add a `personal.txt` file containing sample data and commit it.
-   - Use `git-filter-repo` to remove the file from the repository history.
-   - Document the steps in `part3-writeup.txt`.
+   - Used `git-filter-repo` to remove sensitive data from repository history.
+   - Documented steps in `part3-writeup.txt`.
 
 4. **Build System Configuration**:
-   - Set up Poetry for dependency management and create a `pyproject.toml` file.
-   - Add tools like mypy, black, ruff, flake8, pylint, and bandit to `pyproject.toml`.
+   - Used Poetry to manage dependencies via `pyproject.toml`.
+   - Configured tools in `pyproject.toml` for code quality:
+     - `mypy`
+     - `black`
+     - `ruff`
+     - `flake8`
+     - `pylint`
+     - `bandit`
 
 5. **Testing and Coverage**:
-   - Add unit tests using `pytest` with at least 10 test cases.
-   - Install `pytest-cov` to measure code coverage and ensure at least 75% coverage.
+   - Developed unit tests with at least 10 test cases using `pytest`.
+   - Measured code coverage using `pytest-cov` and ensured 75%+ coverage.
 
-#### More assignments to come
+---
 
-## Tools and Technologies
+### **Assignment 4: SBOM Generation and Attestation**
+#### Tasks:
+1. **Packaging and Publishing**:
+   - Packaged the Python project using Poetry.
+   - Published the package (`rektor`) on PyPI.
+   - Verified the package installation and usage.
+
+2. **SBOM Generation**:
+   - Generated a CycloneDX SBOM using `cyclonedx-py` based on the `pyproject.toml`.
+   - Saved the SBOM as `cyclonedx-sbom.json`.
+
+3. **Attestation**:
+   - Used Sigstore’s `cosign` to attest the SBOM.
+   - Generated attestation files:
+     - `sbom-attestation.json`
+     - `sbom-attestation.bundle`
+   - Verified the attestation using `cosign`.
+
+4. **Submission Requirements**:
+   - Provided GitHub repository link.
+   - Published package on PyPI.
+   - Archived the project repository as `.tar.gz` or `.zip`.
+
+---
+
+## **Tools and Technologies**
 - **Programming Language**: Python
 - **Version Control**: Git (GitHub for repository management)
-- **Signing Tool**: Sigstore (cosign)
+- **Signing Tool**: Sigstore (`cosign`)
 - **Transparency Log**: Rekor
-- **Static Analysis Tools**: Black or Ruff for formatting, Flake8 or Ruff for linting, Bandit for SAST, mypy for type checking
+- **Static Analysis Tools**:
+  - **Formatting**: Black or Ruff
+  - **Linting**: Flake8, Ruff, and Pylint
+  - **Type Checking**: mypy
+  - **SAST**: Bandit
 - **Dependency Management**: Poetry
+- **SBOM Tools**: CycloneDX (`cyclonedx-py`)
 - **Testing Framework**: pytest with pytest-cov for coverage measurement
 
-*Note: This document will be updated as more assignments are released.*
+
+
+## **Future Updates**
+This `README` will be updated as new assignments are released or additional tools and techniques are integrated.
+
+---

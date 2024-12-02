@@ -1,7 +1,7 @@
 venv/
 temp.txt
 personal.txt
-artifact_invalid.md
+# artifact_invalid.md
 secret.txt
 
 .DS_Store
@@ -17,7 +17,7 @@ secret.txt
 .Python
 build/
 develop-eggs/
-dist/
+# dist/
 downloads/
 eggs/
 .eggs/
