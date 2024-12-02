@@ -91,10 +91,27 @@ This project demonstrates the implementation of tools and techniques to enhance 
      - `sbom-attestation.bundle`
    - Verified the attestation using `cosign`.
 
-4. **Submission Requirements**:
-   - Provided GitHub repository link.
-   - Published package on PyPI.
-   - Archived the project repository as `.tar.gz` or `.zip`.
+#### Project structure:
+````
+supply-chain-security/
+├── dist/
+│   ├── rektor-4.0.0-py3-none-any.whl
+│   ├── rektor-4.0.0.tar.gz
+│   ├── cyclonedx-sbom.json
+│   ├── sbom-attestation.json
+│   ├── sbom-attestation.bundle
+├── rektor/
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── main.py
+│   └── other_modules.py
+├── tests/
+│   ├── test_main.py
+│   └── other_tests.py
+├── pyproject.toml
+├── README.md
+├── LICENSE
+````
 
 ---
 
