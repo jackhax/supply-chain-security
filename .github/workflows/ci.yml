@@ -1,0 +1,48 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12  # Update this if needed
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install poetry
+        poetry install
+
+    - name: Code Formatting Check (Black)
+      run: |
+        poetry run black --check .
+
+    - name: Linting (Ruff)
+      uses: astral-sh/ruff-action@v1
+      with:
+        args: --fix .
+
+    - name: SAST (Bandit)
+      run: |
+        poetry run bandit -r .
+
+    - name: Secret Scanning (Trufflehog)
+      uses: trufflesecurity/trufflehog@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Run Tests and Coverage
+      run: |
+        poetry run pytest --cov=rektor

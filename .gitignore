@@ -3,6 +3,7 @@ temp.txt
 personal.txt
 # artifact_invalid.md
 secret.txt
+submission*
 
 .DS_Store
 # Byte-compiled / optimized / DLL files
