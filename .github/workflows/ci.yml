@@ -38,10 +38,10 @@ jobs:
     #   run: |
     #     poetry run bandit -r .
 
-    - name: Run TruffleHog
-      run: |
-        poetry run trufflehog git ${pwd} --since_commit master
-      continue-on-error: true
+    - name: Secret Scanning
+      uses: trufflesecurity/trufflehog@main
+      with:
+        extra_args: --results=verified,unknown
 
     - name: Run Tests and Coverage
       run: |
