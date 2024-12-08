@@ -53,7 +53,9 @@ jobs:
         uses: sigstore/cosign-installer@v3.7.0
 
       - name: Create Cosign Key File
-        run: echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key 
+        run: |
+          echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
+          cat -A cosign.key
 
       # Step 10: Create Attestation for SBOM
       - name: Create SBOM Attestation
