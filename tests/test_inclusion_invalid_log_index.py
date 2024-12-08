@@ -1,6 +1,3 @@
-import sys
-import json
-from jsonschema import validate
 import subprocess
 
 # Define a schema for the expected consistency output (modify as needed)

@@ -31,9 +31,11 @@ jobs:
         poetry run black --check .
 
     - name: Linting (Ruff)
-      uses: astral-sh/ruff-action@v1
-      with:
-        args: --fix .
+      run: |
+        poetry run ruff check .
+      # uses: astral-sh/ruff-action@v1
+      # with:
+      #   args: --fix .
 
     - name: SAST (Bandit)
       run: |
