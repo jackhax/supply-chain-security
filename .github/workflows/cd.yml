@@ -44,12 +44,6 @@ jobs:
           echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
 
       # Step 6: Sign Artifacts
-      - name: Sign Build Artifacts
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-        run: |
-          cosign sign --key cosign.key dist/*.whl
-
       - name: Sign SBOM
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
