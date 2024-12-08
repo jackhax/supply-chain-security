@@ -1,0 +1,90 @@
+name: Continuous Deployment
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on versioned tags, e.g., v1.0.0
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # Allow tag creation and artifact uploads
+      id-token: write
+      attestations: write
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.12'
+
+      # Step 3: Install Poetry
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"
+      # Step 4: Install project dependencies
+      - name: Install Dependencies
+        run: |
+          poetry install --no-dev
+      # Step 5: Build the project
+      - name: Build the Project
+        run: |
+          poetry build
+      # Step 6: Upload Build Artifacts
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/*
+
+      # Step 7: Install CycloneDX for SBOM generation
+      - name: Install CycloneDX
+        run: pip install cyclonedx-bom
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      - name: Create Cosign Key File
+        run: |
+          echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
+          cat -A cosign.key
+
+      # Step 10: Create Attestation for SBOM
+      - name: Create SBOM Attestation
+        env:
+         COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          cosign attest-blob --key cosign.key --type cyclonedx --predicate cyclonedx-sbom.json --bundle sbom-attestation.bundle --output-attestation sbom-attestation.json dist/rektor-4.0.0-py3-none-any.whl --yes
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+            subject-path: dist/xichengtong_rekor-3.0-py3-none-any.whl
+
+      # Step 11: Upload Attestation as Artifact
+      - name: Upload Attestation
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom-attestation
+          path: |
+            sbom-attestation.bundle
+            sbom-attestation.json
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+                dist/*.whl
+                dist/*.tar.gz
+          body: |
+                Release version ${{ github.ref_name }}
+                - Includes SBOM and attestation
+          prerelease: false
+        env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
