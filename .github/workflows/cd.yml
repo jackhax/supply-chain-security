@@ -42,7 +42,7 @@ jobs:
       env:
         COSIGN_EXPERIMENTAL: "1"
       run: |
-        cosign sign-blob sbom.json > sbom.json.sig
+        cosign sign --key ${{ secrets.COSIGN_KEY }} sbom.json
 
     - name: Verify SBOM Signature
       env:
