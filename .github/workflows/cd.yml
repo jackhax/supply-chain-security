@@ -39,8 +39,6 @@ jobs:
         -o /usr/local/bin/cosign && chmod +x /usr/local/bin/cosign
 
     - name: Cosign Sign SBOM
-      env:
-            COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
       run: |
         echo "${{ secrets.COSIGN_KEY }}" > cosign.key
         cosign sign --key cosign.key sbom.json
