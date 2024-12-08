@@ -8,30 +8,36 @@ consistency_schema = {
         "treeID": {"type": "string"},
         "previousTreeSize": {"type": "integer"},
         "currentTreeSize": {"type": "integer"},
-        "hashes": {"type": "array", "items": {"type": "string"}}
+        "hashes": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["treeID", "previousTreeSize", "currentTreeSize", "hashes"]
+    "required": ["treeID", "previousTreeSize", "currentTreeSize", "hashes"],
 }
+
 
 def test_consistency():
     # Run the main.py script with the updated valid values for the --consistency flag
     result = subprocess.run(
         [
-            'python', '-m', 'rektor.main', '--consistency',
-            '--inclusion', '133040969',
-            '--artifact', 'artifact_invalid.md'
+            "python",
+            "-m",
+            "rektor.main",
+            "--consistency",
+            "--inclusion",
+            "133040969",
+            "--artifact",
+            "artifact_invalid.md",
         ],
         capture_output=True,
-        text=True
+        text=True,
     )
-    
+
     output = result.stdout
     error_output = result.stderr
-    
+
     # Print output for debugging
-    print('STDOUT:', output)
-    print('STDERR:', error_output)
-    
+    print("STDOUT:", output)
+    print("STDERR:", error_output)
+
     # Ensure there is output and validate it
     assert "Signature is invalid" in output
     # Modify if necessary

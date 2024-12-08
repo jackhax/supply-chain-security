@@ -57,7 +57,7 @@ def verify_consistency(hasher, size1, size2, proof, root1, root2):
         root1 = bytes.fromhex(root1)
         root2 = bytes.fromhex(root2)
     except ValueError:
-        print('Invalid root(s)')
+        print("Invalid root(s)")
         return
     bytearray_proof = [bytes.fromhex(elem) for elem in proof]
 

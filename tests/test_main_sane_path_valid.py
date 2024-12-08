@@ -2,6 +2,7 @@ import pytest
 from rektor.main import sane_path
 from pathlib import Path
 
+
 def test_sane_path_valid(tmp_path):
     # Create a temporary file in the tmp_path directory
     test_file = tmp_path / "test_file.txt"

@@ -41,8 +41,8 @@ from .merkle_proof import (  # Importing Merkle proof-related functions for veri
     compute_leaf_hash,
 )
 
-# Initialize the global base_url 
-base_url = 'https://rekor.sigstore.dev/api/v1'
+# Initialize the global base_url
+base_url = "https://rekor.sigstore.dev/api/v1"
 
 
 # Check if the provided index is a valid number
@@ -145,7 +145,7 @@ def inclusion(log_index, artifact_filepath, debug=False):
             log["spec"]["signature"]["content"]
         )  # Decode the signature
     except KeyError:
-        print('Invalid log index')
+        print("Invalid log index")
         return
 
     cert = base64.b64decode(
@@ -310,7 +310,7 @@ def main():
         try:
             consistency(prev_checkpoint, debug)  # Perform consistency verification
         except RootMismatchError:
-            print('Consistency cannot be verified')
+            print("Consistency cannot be verified")
 
 
 if __name__ == "__main__":

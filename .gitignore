@@ -4,6 +4,7 @@ personal.txt
 # artifact_invalid.md
 secret.txt
 submission*
+*.copy
 
 .DS_Store
 # Byte-compiled / optimized / DLL files

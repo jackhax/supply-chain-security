@@ -39,10 +39,9 @@ jobs:
       run: |
         poetry run bandit -r .
 
-    # - name: Secret Scanning (Trufflehog)
-    #   uses: trufflesecurity/trufflehog@v3
-    #   with:
-    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run TruffleHog
+      run: |
+        trufflehog git file://$(pwd) --since_commit HEAD --no-verification --fail
 
     - name: Run Tests and Coverage
       run: |
