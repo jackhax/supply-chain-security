@@ -70,10 +70,9 @@ jobs:
 
       # Step 8: Publish Release
       - name: Create Release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
           body: |
             **What's New:**
             - Signed build artifacts
