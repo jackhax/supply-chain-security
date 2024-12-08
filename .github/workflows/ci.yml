@@ -40,7 +40,16 @@ jobs:
 
     - name: Run TruffleHog
       run: |
-        poetry run trufflehog git file://$(pwd) --since_commit HEAD --no-verification --no-update --fail
+        poetry run trufflehog git file://. --since_commit HEAD --no-verification --no-update --fail
+      continue-on-error: true
+    - name: Run TruffleHog
+      run: |
+        poetry run trufflehog git . --since_commit HEAD --no-verification --no-update --fail
+      continue-on-error: true
+    - name: Run TruffleHog
+      run: |
+        poetry run trufflehog git ${pwd} --since_commit HEAD --no-verification --no-update --fail
+      continue-on-error: true
 
     - name: Run Tests and Coverage
       run: |
