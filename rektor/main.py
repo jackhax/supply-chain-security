@@ -9,14 +9,14 @@ This module interacts with the Rekor transparency log to:
 Requires a `config.ini` file containing the Rekor API base URL.
 
 Usage:
-    - Enable debug mode: 
+    - Enable debug mode:
         python verifier.py --debug
     - Fetch the latest checkpoint:
         python verifier.py --checkpoint
     - Verify artifact inclusion in the Rekor log using log index:
         python verifier.py --inclusion <log_index> --artifact <filepath>
     - Verify consistency between a previous checkpoint and the latest:
-        python verifier.py --consistency --tree-id <tree_id> 
+        python verifier.py --consistency --tree-id <tree_id>
         --tree-size <tree_size> --root-hash <root_hash>
 
 Dependencies:
@@ -33,7 +33,7 @@ from .util import (
     extract_public_key,
     verify_artifact_signature,
 )  # Utility functions for signature handling
-from .merkle_proof import (  # Importing Merkle proof-related functions for verifying proofs
+from .merkle_proof import (  # Importing Merkle proof-related functions
     DefaultHasher,
     RootMismatchError,
     verify_consistency,
@@ -70,10 +70,12 @@ def get_log_body(log_index, debug=False):
     """
     if not sane_index(log_index):  # Check if log index is valid
         if debug:
-            print("The value is Not a Number (NaN).")  # Print a message in debug mode
+            # Print a message in debug mode
+            print("The value is Not a Number (NaN).")
         return None
 
-    api = f"{base_url}/log/entries?logIndex={log_index}"  # Construct API endpoint URL
+    # Construct API endpoint URL
+    api = f"{base_url}/log/entries?logIndex={log_index}"
     try:
         data = requests.get(
             api, timeout=10
@@ -83,7 +85,8 @@ def get_log_body(log_index, debug=False):
             print("Timed out")  # Print timeout message in debug mode
         return None
 
-    body = next(iter(data.values()))["body"]  # Extract the body from the log entry
+    # Extract the body from the log entry
+    body = next(iter(data.values()))["body"]
     body = json.loads(
         base64.b64decode(body)
     )  # Decode the base64-encoded body and parse JSON
@@ -100,7 +103,8 @@ def get_log_entry(log_index, debug=False):
             print("The value is Not a Number (NaN).")
         return None
 
-    api = f"{base_url}/log/entries?logIndex={log_index}"  # Construct the API URL
+    # Construct the API URL
+    api = f"{base_url}/log/entries?logIndex={log_index}"
 
     try:
         data = requests.get(api, timeout=10).json()  # Fetch the log entry
@@ -109,7 +113,8 @@ def get_log_entry(log_index, debug=False):
             print("Timed out")
         return None
 
-    log = next(iter(data.values()))  # Extract the log entry from the returned data
+    # Extract the log entry from the returned data
+    log = next(iter(data.values()))
     return log  # Return the full log entry
 
 
@@ -125,7 +130,8 @@ def get_verification_proof(log_index, debug=False):
 
     log = get_log_entry(log_index)  # Fetch the full log entry
     body = log["body"]  # Extract the body from the log entry
-    leaf_hash = compute_leaf_hash(body)  # Compute the leaf hash for inclusion proof
+    # Compute the leaf hash for inclusion proof
+    leaf_hash = compute_leaf_hash(body)
     proof = log["verification"][
         "inclusionProof"
     ]  # Extract the inclusion proof from the log
@@ -151,7 +157,8 @@ def inclusion(log_index, artifact_filepath, debug=False):
     cert = base64.b64decode(
         log["spec"]["signature"]["publicKey"]["content"]
     )  # Decode the public key
-    public_key = extract_public_key(cert)  # Extract the public key from the certificate
+    # Extract the public key from the certificate
+    public_key = extract_public_key(cert)
     verify_artifact_signature(
         signature, public_key, artifact_filepath
     )  # Verify the signature
@@ -190,7 +197,8 @@ def get_latest_checkpoint(debug=False):
 # Verifies the consistency of a checkpoint with the latest checkpoint from the log
 def consistency(prev_checkpoint, debug=False):
     """
-    Verify the consistency between a previous checkpoint and the latest one using Merkle proof.
+    Verify the consistency between a previous \
+    checkpoint and the latest one using Merkle proof.
     """
     if prev_checkpoint == {}:  # Check if the previous checkpoint is empty
         if debug:
@@ -208,7 +216,8 @@ def consistency(prev_checkpoint, debug=False):
 
     try:
         proof = requests.get(  # Send GET request to fetch the consistency proof
-            f'{base_url}/log/proof?firstSize={prev_checkpoint["treeSize"]}&lastSize={tree_size}',
+            f'{base_url}/log/proof?firstSize={
+                prev_checkpoint["treeSize"]}&lastSize={tree_size}',
             timeout=10,
         ).json()[
             "hashes"
@@ -253,7 +262,8 @@ def main():
     )
     parser.add_argument(
         "--inclusion",
-        help="Verify inclusion of an entry in the Rekor Transparency Log using log index",
+        help="Verify inclusion of an entry in the \
+        Rekor Transparency Log using log index",
         required=False,
         type=int,
     )
@@ -308,7 +318,8 @@ def main():
         }
 
         try:
-            consistency(prev_checkpoint, debug)  # Perform consistency verification
+            # Perform consistency verification
+            consistency(prev_checkpoint, debug)
         except RootMismatchError:
             print("Consistency cannot be verified")
 

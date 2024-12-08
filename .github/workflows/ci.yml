@@ -30,13 +30,13 @@ jobs:
       run: |
         poetry run black --check .
 
-    # - name: Linting (Ruff)
-    #   run: |
-    #     poetry run ruff check .
+    - name: Linting (Ruff)
+      run: |
+        poetry run ruff check .
 
-    # - name: SAST (Bandit)
-    #   run: |
-    #     poetry run bandit -r .
+    - name: SAST (Bandit)
+      run: |
+        poetry run bandit -r . -s B603,B101,B404,B607
 
     - name: Secret Scanning
       uses: trufflesecurity/trufflehog@main

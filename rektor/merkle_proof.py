@@ -1,7 +1,7 @@
 """
-This module provides functionality for Merkle tree hash calculations 
-according to RFC 6962. It includes classes and functions for hashing 
-leaves, nodes, verifying consistency and inclusion proofs, and 
+This module provides functionality for Merkle tree hash calculations
+according to RFC 6962. It includes classes and functions for hashing
+leaves, nodes, verifying consistency and inclusion proofs, and
 computing leaf hashes.
 """
 
@@ -71,7 +71,8 @@ def verify_consistency(hasher, size1, size2, proof, root1, root2):
     if size1 == 0:
         if bytearray_proof:
             raise ValueError(
-                f"expected empty bytearray_proof, but got {len(bytearray_proof)} components"
+                f"expected empty bytearray_proof, but got {
+                    len(bytearray_proof)} components"
             )
         return
     if not bytearray_proof:
@@ -81,11 +82,13 @@ def verify_consistency(hasher, size1, size2, proof, root1, root2):
     shift = (size1 & -size1).bit_length() - 1
     inner -= shift
 
-    seed, start = (root1, 0) if size1 == 1 << shift else (bytearray_proof[0], 1)
+    seed, start = (root1, 0) if size1 == 1 << shift else (
+        bytearray_proof[0], 1)
 
     if len(bytearray_proof) != start + inner + border:
         raise ValueError(
-            f"wrong bytearray_proof size {len(bytearray_proof)}, want {start + inner + border}"
+            f"wrong bytearray_proof size {len(bytearray_proof)}, want {
+                start + inner + border}"
         )
 
     bytearray_proof = bytearray_proof[start:]
@@ -156,7 +159,8 @@ class RootMismatchError(Exception):
         self.calculated_root = binascii.hexlify(bytearray(calculated_root))
 
     def __str__(self):
-        return f"calculated root:\n{self.calculated_root}\n does not match expected root:\n{self.expected_root}"
+        return f"calculated:\n{self.calculated_root}\n \
+        expected root:\n{self.expected_root}"
 
 
 def root_from_inclusion_proof(hasher, index, size, leaf_hash, proof):
@@ -166,12 +170,14 @@ def root_from_inclusion_proof(hasher, index, size, leaf_hash, proof):
 
     if len(leaf_hash) != hasher.size():
         raise ValueError(
-            f"leaf_hash has unexpected size {len(leaf_hash)}, want {hasher.size()}"
+            f"leaf_hash has unexpected size {len(leaf_hash)}, want {
+                hasher.size()}"
         )
 
     inner, border = decomp_incl_proof(index, size)
     if len(proof) != inner + border:
-        raise ValueError(f"wrong proof size {len(proof)}, want {inner + border}")
+        raise ValueError(f"wrong proof size {
+                         len(proof)}, want {inner + border}")
 
     res = chain_inner(hasher, leaf_hash, proof[:inner], index)
     res = chain_border_right(hasher, res, proof[inner:])
