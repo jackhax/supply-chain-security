@@ -54,7 +54,7 @@ jobs:
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
-          cosign attest-blob --key cosign.key --type cyclonedx --predicate sbom.json --bundle sbom-attestation.bundle --output-attestation sbom-attestation.json dist/*.whl --yes
+          cosign attest-blob --key cosign.key --type cyclonedx --predicate sbom.json --bundle sbom-attestation.bundle --output-attestation sbom-attestation.json dist/rektor-4.0.0-py3-none-any.whl --yes
 
 
       # Step 7: Upload Build Outputs
