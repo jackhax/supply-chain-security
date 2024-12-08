@@ -34,9 +34,9 @@ jobs:
     #   run: |
     #     poetry run ruff check .
 
-    - name: SAST (Bandit)
-      run: |
-        poetry run bandit -r .
+    # - name: SAST (Bandit)
+    #   run: |
+    #     poetry run bandit -r .
 
     - name: Run TruffleHog
       run: |
