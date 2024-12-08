@@ -42,6 +42,7 @@ jobs:
       run: |
         echo "${{ secrets.COSIGN_KEY }}" > cosign.key
         cat -A cosign.key
+        sed -i 's/\r$//' cosign.key
 
     - name: Cosign Sign SBOM
       env:
