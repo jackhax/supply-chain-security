@@ -1,0 +1,64 @@
+name: Continuous Deployment
+
+on:
+  push:
+    tags:
+      - 'v*'  # Matches tags like v1.0, v1.1, etc.
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Build project
+      run: poetry build
+
+    - name: Generate SBOM
+      run: poetry run cyclonedx-py -o sbom.json
+
+    - name: Install Cosign
+      run: |
+        curl -sSL https://github.com/sigstore/cosign/releases/download/v2.1.1/cosign-linux-amd64 \
+        -o /usr/local/bin/cosign && chmod +x /usr/local/bin/cosign
+
+    - name: Cosign Keyless Sign SBOM
+      env:
+        COSIGN_EXPERIMENTAL: "1"
+      run: |
+        cosign sign-blob --keyless sbom.json > sbom.json.sig
+
+    - name: Verify SBOM Signature
+      env:
+        COSIGN_EXPERIMENTAL: "1"
+      run: cosign verify-blob --keyless sbom.json --signature sbom.json.sig
+
+    - name: Upload SBOM and Signature
+      uses: actions/upload-artifact@v3
+      with:
+        name: sbom-artifacts
+        path: |
+          sbom.json
+          sbom.json.sig
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*
+          sbom.json
+          sbom.json.sig
