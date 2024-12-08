@@ -45,9 +45,10 @@ jobs:
           name: build-artifacts
           path: dist/*
 
-      # Step 7: Install CycloneDX for SBOM generation
-      - name: Install CycloneDX
-        run: pip install cyclonedx-bom
+      # Step 4: Generate SBOM
+      - name: Generate Python SBOM
+        run: |
+          poetry run cyclonedx-py poetry -o cyclonedx-sbom.json
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.7.0
