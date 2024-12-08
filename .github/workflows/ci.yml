@@ -41,7 +41,7 @@ jobs:
 
     - name: Run TruffleHog
       run: |
-        trufflehog git file://$(pwd) --since_commit HEAD --no-verification --fail
+        trufflehog git file://$(pwd) --since_commit HEAD --no-verification --no-update --fail
 
     - name: Run Tests and Coverage
       run: |
