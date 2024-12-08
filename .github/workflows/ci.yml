@@ -40,7 +40,7 @@ jobs:
 
     - name: Run TruffleHog
       run: |
-        poetry run trufflehog git ${pwd} --since_commit HEAD
+        poetry run trufflehog git file://. --since_commit master
       continue-on-error: true
 
     - name: Run Tests and Coverage
