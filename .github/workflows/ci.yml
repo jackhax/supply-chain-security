@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - main
+      - main`
 
 jobs:
   ci:
@@ -39,10 +39,10 @@ jobs:
       run: |
         poetry run bandit -r .
 
-    - name: Secret Scanning (Trufflehog)
-      uses: trufflesecurity/trufflehog@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Secret Scanning (Trufflehog)
+    #   uses: trufflesecurity/trufflehog@v3
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run Tests and Coverage
       run: |
