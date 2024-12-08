@@ -1,10 +1,10 @@
-name: CI Pipeline
+name: continuous integration
 
 on:
   push:
     branches:
       - master
-      - main`
+      - main
 
 jobs:
   ci:

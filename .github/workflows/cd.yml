@@ -29,7 +29,7 @@ jobs:
       run: poetry build
 
     - name: Generate SBOM
-      run: poetry run cyclonedx-py -o sbom.json
+      run: poetry run cyclonedx-py poetry -o sbom.json
 
     - name: Install Cosign
       run: |
