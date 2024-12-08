@@ -82,8 +82,7 @@ def verify_consistency(hasher, size1, size2, proof, root1, root2):
     shift = (size1 & -size1).bit_length() - 1
     inner -= shift
 
-    seed, start = (root1, 0) if size1 == 1 << shift else (
-        bytearray_proof[0], 1)
+    seed, start = (root1, 0) if size1 == 1 << shift else (bytearray_proof[0], 1)
 
     if len(bytearray_proof) != start + inner + border:
         raise ValueError(
@@ -176,8 +175,10 @@ def root_from_inclusion_proof(hasher, index, size, leaf_hash, proof):
 
     inner, border = decomp_incl_proof(index, size)
     if len(proof) != inner + border:
-        raise ValueError(f"wrong proof size {
-                         len(proof)}, want {inner + border}")
+        raise ValueError(
+            f"wrong proof size {
+                         len(proof)}, want {inner + border}"
+        )
 
     res = chain_inner(hasher, leaf_hash, proof[:inner], index)
     res = chain_border_right(hasher, res, proof[inner:])
