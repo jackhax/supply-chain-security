@@ -37,10 +37,16 @@ jobs:
       run: |
         curl -sSL https://github.com/sigstore/cosign/releases/download/v2.1.1/cosign-linux-amd64 \
         -o /usr/local/bin/cosign && chmod +x /usr/local/bin/cosign
-
-    - name: Cosign Sign SBOM
+    
+    - name: Create Cosign Key File
       run: |
         echo "${{ secrets.COSIGN_KEY }}" > cosign.key
+        cat -A cosign.key
+
+    - name: Cosign Sign SBOM
+      env:
+         COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      run: |
         cosign sign --key cosign.key sbom.json
 
     - name: Verify SBOM Signature
