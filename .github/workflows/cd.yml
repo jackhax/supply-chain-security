@@ -38,9 +38,9 @@ jobs:
         curl -sSL https://github.com/sigstore/cosign/releases/download/v2.1.1/cosign-linux-amd64 \
         -o /usr/local/bin/cosign && chmod +x /usr/local/bin/cosign
 
-    - name: Cosign Keyless Sign SBOM
+    - name: Cosign Sign SBOM
       env:
-        COSIGN_EXPERIMENTAL: "1"
+            COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
       run: |
         echo "${{ secrets.COSIGN_KEY }}" > cosign.key
         cosign sign --key cosign.key sbom.json
