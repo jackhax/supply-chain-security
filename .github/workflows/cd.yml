@@ -3,69 +3,80 @@ name: Continuous Deployment
 on:
   push:
     tags:
-      - 'v*'  # Matches tags like v1.0, v1.1, etc.
+      - 'v*'  # Run workflow on versioned tags, e.g., v1.2.0
 
 jobs:
-  deploy:
+  release:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write  # For uploading artifacts and creating releases
+      id-token: write  # For signing with OIDC
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Repository Checkout
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.12
+      # Step 2: Environment Setup
+      - name: Setup Python and Dependencies
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.12'
+      - name: Install Required Tools
+        run: |
+          pip install poetry cyclonedx-bom
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
+      # Step 3: Build and Package
+      - name: Build Project
+        run: poetry build --format wheel
 
-    - name: Install dependencies
-      run: poetry install
+      # Step 4: Generate SBOM
+      - name: Generate Python SBOM
+        run: |
+          poetry run cyclonedx-py poetry -o sbom.json
 
-    - name: Build project
-      run: poetry build
+      # Step 5: Configure Signing Tools
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+      - name: Prepare Cosign Key
+        run: |
+          echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
 
-    - name: Generate SBOM
-      run: |
-        poetry add cyclonedx-bom
-        poetry run cyclonedx-py poetry -o sbom.json
+      # Step 6: Sign Artifacts
+      - name: Sign Build Artifacts
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          cosign sign --key cosign.key dist/*.whl
 
-    - name: Install Cosign
-      run: |
-        curl -sSL https://github.com/sigstore/cosign/releases/download/v2.1.1/cosign-linux-amd64 \
-        -o /usr/local/bin/cosign && chmod +x /usr/local/bin/cosign
-    
-    - name: Create Cosign Key File
-      run: |
-        echo "${{ secrets.COSIGN_KEY }}" > cosign.key
-        cat -A cosign.key
+      - name: Sign SBOM
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          cosign attest --key cosign.key --type cyclonedx --predicate sbom.json dist/*.whl
 
-    - name: Cosign Sign SBOM
-      env:
-         COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-      run: |
-        cosign sign --key cosign.key sbom.json
+      # Step 7: Upload Build Outputs
+      - name: Upload Build and SBOM
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-assets
+          path: |
+            dist/*
+            sbom.json
+            sbom.json.sig
 
-    - name: Verify SBOM Signature
-      env:
-        COSIGN_EXPERIMENTAL: "1"
-      run: cosign verify-blob --keyless sbom.json --signature sbom.json.sig
-
-    - name: Upload SBOM and Signature
-      uses: actions/upload-artifact@v3
-      with:
-        name: sbom-artifacts
-        path: |
-          sbom.json
-          sbom.json.sig
-
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          dist/*
-          sbom.json
-          sbom.json.sig
+      # Step 8: Publish Release
+      - name: Create Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            **What's New:**
+            - Signed build artifacts
+            - Includes SBOM for transparency
+          files: |
+            dist/*.whl
+            sbom.json
+            sbom.json.sig
