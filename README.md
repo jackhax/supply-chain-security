@@ -1,3 +1,4 @@
+[![CD](https://github.com/jackhax/supply-chain-security/actions/workflows/cd.yml/badge.svg)](https://github.com/jackhax/supply-chain-security/actions/workflows/cd.yml)
 
 # **Software Supply Chain Security**
 
