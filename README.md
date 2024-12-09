@@ -1,9 +1,14 @@
-[![CD](https://github.com/jackhax/supply-chain-security/actions/workflows/cd.yml/badge.svg)](https://github.com/jackhax/supply-chain-security/actions/workflows/cd.yml) [![Scorecard OSSF](https://github.com/jackhax/supply-chain-security/actions/workflows/scorecard.yml/badge.svg)](https://github.com/jackhax/supply-chain-security/actions/workflows/scorecard.yml) [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9778/badge)](https://www.bestpractices.dev/projects/9778)
 
 # **Software Supply Chain Security**
 
+[![CD](https://github.com/jackhax/supply-chain-security/actions/workflows/cd.yml/badge.svg)](https://github.com/jackhax/supply-chain-security/actions/workflows/cd.yml)
+[![Scorecard OSSF](https://github.com/jackhax/supply-chain-security/actions/workflows/scorecard.yml/badge.svg)](https://github.com/jackhax/supply-chain-security/actions/workflows/scorecard.yml)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9778/badge)](https://www.bestpractices.dev/projects/9778)
+
+---
+
 ## **Project Overview**
-This project demonstrates the implementation of tools and techniques to enhance software supply chain security. It includes signing, verification, dependency management, code quality improvement, and SBOM generation, aligned with best practices in software development and security.
+This project demonstrates the implementation of tools and techniques to enhance software supply chain security. It includes signing, verification, dependency management, code quality improvement, SBOM generation, and CI/CD automation aligned with best practices in software development and security.
 
 ---
 
@@ -116,6 +121,31 @@ supply-chain-security/
 
 ---
 
+### **Assignment 5: Automate Everything!**
+#### Tasks:
+1. **Continuous Integration (CI)**:
+   - Created a `ci.yml` workflow to automate:
+     - Code formatting checks with tools like `ruff` and `black`.
+     - Lint checks with `flake8`, `ruff`, and `pylint`.
+     - Static Application Security Testing (SAST) with `bandit`.
+     - Secret scanning with `trufflehog`.
+     - Testing and code coverage using `pytest` and `pytest-cov`.
+
+2. **Continuous Deployment (CD)**:
+   - Created a `cd.yml` workflow to automate:
+     - Building the project using Poetry.
+     - Generating an SBOM with `cyclonedx-py`.
+     - Attesting the SBOM using `cosign`.
+     - Uploading build artifacts and attestations to GitHub releases.
+
+3. **Repository Assessment**:
+   - Added badges to `README.md`:
+     - Build status badge to indicate workflow success.
+     - OpenSSF Scorecard badge to display repository security rating.
+     - OpenSSF Best Practices badge to highlight adherence to best practices.
+
+---
+
 ## **Tools and Technologies**
 - **Programming Language**: Python
 - **Version Control**: Git (GitHub for repository management)
@@ -130,9 +160,8 @@ supply-chain-security/
 - **SBOM Tools**: CycloneDX (`cyclonedx-py`)
 - **Testing Framework**: pytest with pytest-cov for coverage measurement
 
-
+---
 
 ## **Future Updates**
 This `README` will be updated as new assignments are released or additional tools and techniques are integrated.
 
----
