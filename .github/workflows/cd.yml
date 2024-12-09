@@ -2,63 +2,100 @@ name: Continuous Deployment
 
 on:
   push:
-    tags:
-      - 'v*'  # Matches tags like v1.0, v1.1, etc.
+    branches:
+      - master
+    # tags:
+    #   - 'v*'  # Run workflow on versioned tags, e.g., v1.2.0
 
 jobs:
-  deploy:
+  release:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
+      id-token: write 
+      
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Repository Checkout
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.12
+      # Step 2: Environment Setup
+      - name: Setup Python and Dependencies
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.12'
+      - name: Install Required Tools
+        run: |
+          pip install poetry cyclonedx-bom
+      - name: Extract Version
+        id: get_version
+        run: |
+          version=$(poetry version -s)  # Extract version using poetry
+          echo "VERSION=$version" >> $GITHUB_ENV  # Save it to the GitHub environment
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
 
-    - name: Install dependencies
-      run: poetry install
+      # Step 3: Build and Package
+      - name: Clear dist
+        run: rm -rf dist/*whl
+      - name: Build Project
+        run: poetry build --format wheel
+      - name: Debug Build Artifacts
+        run: ls -al dist/
+      
+      # Step 4: Generate SBOM
+      - name: Generate Python SBOM
+        run: |
+          poetry run cyclonedx-py poetry -o sbom.json
 
-    - name: Build project
-      run: poetry build
+      # Step 5: Configure Signing Tools
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+      - name: Prepare Cosign Key
+        run: |
+          echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
 
-    - name: Generate SBOM
-      run: poetry run cyclonedx-py -o sbom.json
+      # Step 6: Sign Artifacts
+      - name: Sign SBOM
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          cosign attest-blob \
+          --key cosign.key \
+          --type cyclonedx \
+          --predicate sbom.json \
+          --bundle sbom-attestation.bundle \
+          --output-attestation sbom-attestation.json \
+          dist/rektor-${{ env.VERSION }}-py3-none-any.whl \
+          --yes
+      
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/rektor-${{ env.VERSION }}-py3-none-any.whl
+  
+        # Step 11: Upload Attestation as Artifact
+      - name: Upload Attestation
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom-attestation
+          path: |
+            sbom-attestation.bundle
+            sbom-attestation.json
 
-    - name: Install Cosign
-      run: |
-        curl -sSL https://github.com/sigstore/cosign/releases/download/v2.1.1/cosign-linux-amd64 \
-        -o /usr/local/bin/cosign && chmod +x /usr/local/bin/cosign
-
-    - name: Cosign Keyless Sign SBOM
-      env:
-        COSIGN_EXPERIMENTAL: "1"
-      run: |
-        cosign sign-blob --keyless sbom.json > sbom.json.sig
-
-    - name: Verify SBOM Signature
-      env:
-        COSIGN_EXPERIMENTAL: "1"
-      run: cosign verify-blob --keyless sbom.json --signature sbom.json.sig
-
-    - name: Upload SBOM and Signature
-      uses: actions/upload-artifact@v3
-      with:
-        name: sbom-artifacts
-        path: |
-          sbom.json
-          sbom.json.sig
-
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          dist/*
-          sbom.json
-          sbom.json.sig
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: |
+            **What's New:**
+            - Signed build artifacts
+            - Includes SBOM for transparency
+          files: |
+            dist/rektor-${{ env.VERSION }}-py3-none-any.whl
+            sbom.json
+            sbom-attestation.json
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
