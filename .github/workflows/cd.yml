@@ -1,4 +1,4 @@
-name: Continuous Deployment
+name: CD
 
 on:
   push:
@@ -10,12 +10,12 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-      pull-requests: write
-      repository-projects: write
-      id-token: write 
+    permissions: write-all
+    # permissions:
+    #   contents: write
+    #   pull-requests: write
+    #   repository-projects: write
+    #   id-token: write 
       
     steps:
       # Step 1: Repository Checkout

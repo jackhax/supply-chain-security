@@ -3,7 +3,7 @@ name = "rektor"
 packages = [
     { include = "rektor" }
 ]
-version = "4.0.0"
+version = "5.2.0"
 description = "Rekor Transparency Log Verifier"
 authors = ["Adnan Jakati <mj3184@nyu.edu>"]
 readme = "README.md"
