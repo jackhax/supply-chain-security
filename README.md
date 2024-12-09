@@ -1,4 +1,4 @@
-[![CD](https://github.com/jackhax/supply-chain-security/actions/workflows/cd.yml/badge.svg)](https://github.com/jackhax/supply-chain-security/actions/workflows/cd.yml) [![Scorecard OSSF](https://github.com/jackhax/supply-chain-security/actions/workflows/scorecard.yml/badge.svg)](https://github.com/jackhax/supply-chain-security/actions/workflows/scorecard.yml)
+[![CD](https://github.com/jackhax/supply-chain-security/actions/workflows/cd.yml/badge.svg)](https://github.com/jackhax/supply-chain-security/actions/workflows/cd.yml) [![Scorecard OSSF](https://github.com/jackhax/supply-chain-security/actions/workflows/scorecard.yml/badge.svg)](https://github.com/jackhax/supply-chain-security/actions/workflows/scorecard.yml) [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9778/badge)](https://www.bestpractices.dev/projects/9778)
 
 # **Software Supply Chain Security**
 
