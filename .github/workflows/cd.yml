@@ -2,10 +2,8 @@ name: CD
 
 on:
   push:
-    branches:
-      - master
-    # tags:
-    #   - 'v*'  # Run workflow on versioned tags, e.g., v1.2.0
+    tags:
+      - 'v*'  # Run workflow on versioned tags, e.g., v1.2.0
 
 jobs:
   release:
