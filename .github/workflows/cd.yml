@@ -9,11 +9,6 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions: write-all
-    # permissions:
-    #   contents: write
-    #   pull-requests: write
-    #   repository-projects: write
-    #   id-token: write 
       
     steps:
       # Step 1: Repository Checkout
@@ -25,9 +20,11 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: '3.12'
+
       - name: Install Required Tools
         run: |
           pip install poetry cyclonedx-bom
+
       - name: Extract Version
         id: get_version
         run: |
@@ -35,11 +32,10 @@ jobs:
           echo "VERSION=$version" >> $GITHUB_ENV  # Save it to the GitHub environment
 
 
-      # Step 3: Build and Package
-      - name: Clear dist
-        run: rm -rf dist/*whl
+      # Step 3: Build Package
       - name: Build Project
         run: poetry build --format wheel
+
       - name: Debug Build Artifacts
         run: ls -al dist/
       
@@ -69,12 +65,13 @@ jobs:
           dist/rektor-${{ env.VERSION }}-py3-none-any.whl \
           --yes
       
+      # Step 7: Attest
       - name: Attest Build Provenance
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: dist/rektor-${{ env.VERSION }}-py3-none-any.whl
   
-        # Step 11: Upload Attestation as Artifact
+      # Step 8: Upload Attestation as Artifact
       - name: Upload Attestation
         uses: actions/upload-artifact@v3
         with:
@@ -83,6 +80,7 @@ jobs:
             sbom-attestation.bundle
             sbom-attestation.json
 
+      #Step 9: Create release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
